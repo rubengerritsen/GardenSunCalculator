@@ -81,7 +81,7 @@ void ShadowCalculator::growSeasonAverage() {
     cumSum = Eigen::ArrayXXd::Zero(stepsV1, stepsV2);
     for (tm.month = 5; tm.month < 10; tm.month++) {
       progressBar((height / maxHeight +
-                   increment * (tm.month - 5.0) / 5.0 / maxHeight));
+                   increment * (tm.month - 4.0) / 5.0 / maxHeight));
       for (tm.day = 1; tm.day < 31; tm.day++) {
         for (tm.hour = 0; tm.hour < 24; tm.hour++) {
           for (tm.min = 0; tm.min < 60; tm.min += 5) {
@@ -174,8 +174,7 @@ void ShadowCalculator::specificMoment() {
 void ShadowCalculator::hourly() {
   // Setup folder for the output
   checkForDirectory(options.get<std::string>("outputPath"));
-  std::string outputDir =
-      options.get<std::string>("outputPath") + "/hourly";
+  std::string outputDir = options.get<std::string>("outputPath") + "/hourly";
   checkForDirectory(outputDir);
 
   int iterations = 0;
@@ -211,11 +210,13 @@ void ShadowCalculator::hourly() {
 
 Eigen::ArrayXXd ShadowCalculator::computeShadow(tm_r tm, double height) {
   Eigen::ArrayXXd sunCollector = Eigen::ArrayXXd::Zero(stepsV1, stepsV2);
-
   double lightGoingThrough = 1.0;
   sunDir = sun.getSunDirection(tm);
-#pragma omp parallel for num_threads(nThreads) private(                        \
-    lightGoingThrough, ray_origin) shared(sunCollector, height)
+// Define a reduction for the eigen array class
+#pragma omp declare reduction (+: Eigen::ArrayXXd: omp_out=omp_out+omp_in)\
+     initializer(omp_priv=Eigen::ArrayXXd::Zero(omp_orig.rows(), omp_orig.cols()))
+#pragma omp parallel for num_threads(nThreads) default(none) private(                        \
+    lightGoingThrough, ray_origin) shared(height, vector1, vector2, origin, stepsV1, stepsV2, objects) reduction(+:sunCollector)
   for (int i = 0; i < stepsV1; i++) {
     for (int j = 0; j < stepsV2; j++) {
       // why (i+0.5):  0.5 gets us to the center of a cell

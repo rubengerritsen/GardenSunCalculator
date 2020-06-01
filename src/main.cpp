@@ -10,6 +10,7 @@
 #include <string>
 #include "tm_r.h"
 #include "ShadowCalculator.h"
+#include <chrono>
 
 
 void setupAndRun(int ac, char *av[]) {
@@ -65,7 +66,9 @@ void setupAndRun(int ac, char *av[]) {
   // Initialize the ShadowCalculator
   ShadowCalculator shadowCalc(geometry.getObjects(), geometry.getVertices(), sun, options);
 
+
   // Execute the mode of the options
+  auto start = std::chrono::steady_clock::now();
   if(options.get<std::string>("mode") == "growseason"){
     std::cout << "Computing average daily sun exposure over the growseason.\n";
     shadowCalc.growSeasonAverage();
@@ -81,8 +84,12 @@ void setupAndRun(int ac, char *av[]) {
   } else {
     std::cout << options.get<std::string>("mode") << " is not a valid mode.\n";
   }
+  auto end = std::chrono::steady_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end-start);
 
   std::cout << "Garden sun calculator is done.\n";
+  std::cout << "The computation took " << duration.count() << "s\n";
   std::cout << "Results can be found in: " << options.get<std::string>("outputPath") << std::endl;
 }
 

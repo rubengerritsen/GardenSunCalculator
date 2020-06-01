@@ -1,5 +1,5 @@
 <options>
-    <mode help="can be: growseason, specificmoment, monthly or hourly">hourly</mode>
+    <mode help="can be: growseason, specificmoment, monthly or hourly">growseason</mode>
     <outputPath>../output</outputPath>
     <latitude>51.463839</latitude>
     <longitude>5.474531</longitude>
