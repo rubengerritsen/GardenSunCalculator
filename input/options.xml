@@ -4,11 +4,10 @@
     <latitude>51.463839</latitude>
     <longitude>5.474531</longitude>
     <timezone>2.0</timezone>
-    <maxHeight>2.50</maxHeight>
+    <maxHeight>2.75</maxHeight>
     <heightIncr>0.25</heightIncr>
-    <geometryFile help="path to a wavefront (.obj) file with the geometry">/home/ruben/Projects/LightAndShadows/Geometries/EindhovenBalcony.obj</geometryFile>
+    <geometryFile help="path to a wavefront (.obj) file with the geometry">../input/EindhovenBalcony.obj</geometryFile>
     <geometryRotation help="The rotation of the geometry file (x-axis) with respect to north on the map (counterclockwise)">8.13</geometryRotation>
-    <height>1.08</height>
     <regionO help="origin of the region that is considered for shadow computation">-1.92 0.665 0.0</regionO>
     <regionV1 help ="first vertex indicating one of the corners of the (rectangular) region">-1.92 -0.665 0.0</regionV1>
     <regionV2 help ="vertex indicating the second corner of the region such that V2-O is perpendicular to V1-O">1.92 0.665 0.0</regionV2>

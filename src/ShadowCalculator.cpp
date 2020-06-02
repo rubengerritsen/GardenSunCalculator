@@ -76,11 +76,11 @@ void ShadowCalculator::growSeasonAverage() {
   std::string outputFile;
   double maxHeight = options.get<double>("maxHeight");
   double increment = options.get<double>("heightIncr");
-  for (double height = 0; height < maxHeight; height += increment) {
+  for (double height = 0; height <= maxHeight; height += increment) {
     iterations = 0;
     cumSum = Eigen::ArrayXXd::Zero(stepsV1, stepsV2);
     for (tm.month = 5; tm.month < 10; tm.month++) {
-      progressBar((height / maxHeight +
+      progressBar((height / (maxHeight + increment) +
                    increment * (tm.month - 4.0) / 5.0 / maxHeight));
       for (tm.day = 1; tm.day < 31; tm.day++) {
         for (tm.hour = 0; tm.hour < 24; tm.hour++) {
@@ -95,7 +95,7 @@ void ShadowCalculator::growSeasonAverage() {
     cumSum = 24.0 * cumSum / iterations;
     // write the results to a file
     outputFile =
-        outputDir + (boost::format("/height_%3.0f.txt") % (height * 100)).str();
+        outputDir + (boost::format("/height_%.0f.txt") % (height * 100)).str();
     writeEigenArray2DToFile(cumSum, outputFile);
   }
   std::cout << std::endl; // end line after progress bar
@@ -118,10 +118,11 @@ void ShadowCalculator::monthly() {
 
   // Doing the calculations
   for (tm.month = 1; tm.month <= 12; tm.month++) {
-    for (double height = 0; height < maxHeight; height += increment) {
+    for (double height = 0; height <= maxHeight; height += increment) {
       iterations = 0;
       cumSum = Eigen::ArrayXXd::Zero(stepsV1, stepsV2);
-      progressBar(((tm.month - 1.0) / 12 + height / maxHeight / 12));
+      progressBar(
+          ((tm.month - 1.0) / 12 + height / (maxHeight + increment) / 12));
       for (tm.day = 1; tm.day < 31; tm.day++) {
         for (tm.hour = 0; tm.hour < 24; tm.hour++) {
           for (tm.min = 0; tm.min < 60; tm.min += 5) {
@@ -132,7 +133,7 @@ void ShadowCalculator::monthly() {
       }
       cumSum = 24.0 * cumSum / iterations;
       // write the results to a file
-      outputFile = outputDir + (boost::format("/month_%d_height_%3.0f.txt") %
+      outputFile = outputDir + (boost::format("/month_%d_height_%.0f.txt") %
                                 tm.month % (height * 100))
                                    .str();
       writeEigenArray2DToFile(cumSum, outputFile);
@@ -164,7 +165,7 @@ void ShadowCalculator::specificMoment() {
   // Doing the calculations
   for (double height = 0; height < maxHeight; height += increment) {
     outputFile =
-        outputDir + (boost::format("/%d%d%d_%d%d_height_%3.0f.txt") % tm.year %
+        outputDir + (boost::format("/%d%d%d_%d%d_height_%.0f.txt") % tm.year %
                      tm.month % tm.day % tm.hour % tm.min % (height * 100))
                         .str();
     writeEigenArray2DToFile(computeShadow(tm, height), outputFile);
@@ -199,7 +200,7 @@ void ShadowCalculator::hourly() {
         iterations++;
       }
       outputFile =
-          outputDir + (boost::format("/%d%d%d_h%d_height_%3.0f.txt") % tm.year %
+          outputDir + (boost::format("/%d%d%d_h%d_height_%.0f.txt") % tm.year %
                        tm.month % tm.day % tm.hour % (height * 100))
                           .str();
       writeEigenArray2DToFile(cumSum, outputFile);
@@ -212,6 +213,9 @@ Eigen::ArrayXXd ShadowCalculator::computeShadow(tm_r tm, double height) {
   Eigen::ArrayXXd sunCollector = Eigen::ArrayXXd::Zero(stepsV1, stepsV2);
   double lightGoingThrough = 1.0;
   sunDir = sun.getSunDirection(tm);
+  if (sunDir[2] < 0.0) { // the sun is below the horizon
+    return sunCollector;
+  }
 // Define a reduction for the eigen array class
 #pragma omp declare reduction (+: Eigen::ArrayXXd: omp_out=omp_out+omp_in)\
      initializer(omp_priv=Eigen::ArrayXXd::Zero(omp_orig.rows(), omp_orig.cols()))
@@ -221,7 +225,8 @@ Eigen::ArrayXXd ShadowCalculator::computeShadow(tm_r tm, double height) {
     for (int j = 0; j < stepsV2; j++) {
       // why (i+0.5):  0.5 gets us to the center of a cell
       ray_origin = origin + (vector1 - origin) / stepsV1 * (i + 0.5) +
-                   (vector2 - origin) * (j + 0.5) / stepsV2 + height * z_axis;
+                   (vector2 - origin) * (j + 0.5) / stepsV2 +
+                   (height + 1e-6) * z_axis;
       lightGoingThrough = 1.0;
       for (auto &obj : objects) {
         for (auto &face : obj.getFaces()) {
