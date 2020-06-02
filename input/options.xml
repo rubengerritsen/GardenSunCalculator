@@ -4,6 +4,13 @@
     <latitude>51.463839</latitude>
     <longitude>5.474531</longitude>
     <timezone>2.0</timezone>
+    <date help="Change what is necessary, e.g. only year is relevant for growseason">
+        <year>2020</year>
+        <month>5</month>
+        <day>31</day>
+        <hour>12</hour>
+        <minute>30</minute>
+    </date>
     <maxHeight>2.75</maxHeight>
     <heightIncr>0.25</heightIncr>
     <geometryFile help="path to a wavefront (.obj) file with the geometry">../input/EindhovenBalcony.obj</geometryFile>
@@ -14,11 +21,4 @@
     <stepsV1 help ="number of steps in V1 direction">26</stepsV1>
     <stepsV2 help="number of steps in V2 direction">77</stepsV2>
     <nrOfThreads>6</nrOfThreads>
-    <date help="Change what is necessary, e.g. only year is relevant for growseason">
-        <year>2020</year>
-        <month>5</month>
-        <day>31</day>
-        <hour>12</hour>
-        <minute>30</minute>
-    </date>
 </options>
