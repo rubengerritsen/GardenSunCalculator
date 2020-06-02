@@ -21,7 +21,7 @@ options = tree.getroot()
 
 """ make a zoned color map """ 
 cmap = colors.ListedColormap(['darkblue', 'lawngreen', 'orange'])
-bounds=[0,2,5,12]
+bounds=[0,2,5,10]
 norm = colors.BoundaryNorm(bounds, cmap.N)
 """ use a continuous color map """ 
 #cmap = plt.get_cmap('jet')
